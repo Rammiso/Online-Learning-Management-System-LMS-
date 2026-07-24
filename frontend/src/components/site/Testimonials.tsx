@@ -78,7 +78,7 @@ export function Testimonials() {
   ).sort();
 
   const uniquePrograms = Array.from(
-    new Set(testimonials.map((t) => t.program).filter(Boolean)),
+    new Set(testimonials.map((t) => t.program).filter((p): p is string => p !== null)),
   ).sort();
 
   // Filter logic
