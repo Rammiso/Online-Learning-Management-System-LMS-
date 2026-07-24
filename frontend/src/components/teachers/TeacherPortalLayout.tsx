@@ -1,6 +1,7 @@
 import { ReactNode, useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { AppSidebar } from "@/components/ui/AppSidebar";
+import { OnboardingGuard } from "@/components/ui/OnboardingGuard";
 import {
   Menu,
   LayoutDashboard,
@@ -90,6 +91,7 @@ export function TeacherPortalLayout({
   };
 
   return (
+    <OnboardingGuard>
     <SidebarProvider>
       <div className="flex h-screen dark:bg-background bg-gray-50/80 overflow-hidden text-foreground font-sans">
         {/* Ambient Background */}
@@ -165,6 +167,7 @@ export function TeacherPortalLayout({
         />
       </div>
     </SidebarProvider>
+    </OnboardingGuard>
   );
 }
 
