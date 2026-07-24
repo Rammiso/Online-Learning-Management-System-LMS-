@@ -18,7 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { UserPlus, BookOpen, GraduationCap, Briefcase, Upload, DollarSign, Star, Globe, FileText } from 'lucide-react';
+import { UserPlus, BookOpen, GraduationCap, Briefcase, Upload, Wallet, Star, Globe, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { buildCreateTeacherPayload } from '@/lib/teacher-payload';
 import { API_BASE, apiAssetUrl, formatApiError, apiUrl } from "@/lib/api";
@@ -609,7 +609,7 @@ export function AddTeacherModal({ open, onClose, onSuccess }: AddTeacherModalPro
               <div className="grid gap-1.5">
                 <Label htmlFor="monthlySalary" className="text-xs font-semibold dark:text-muted-foreground">Monthly Salary</Label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="monthlySalary"
                     type="number"
