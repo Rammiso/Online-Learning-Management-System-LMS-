@@ -2,12 +2,12 @@ import { useState, useCallback, useEffect } from 'react';
 
 const STORAGE_KEY = 'sidebar_collapsed';
 
-let globalCollapsed: boolean;
-try {
-  globalCollapsed = localStorage.getItem(STORAGE_KEY) === 'true';
-} catch {
-  globalCollapsed = false;
+function readStoredCollapsed(): boolean {
+  try { return localStorage.getItem(STORAGE_KEY) === 'true'; } catch { return false; }
 }
+
+let globalCollapsed = false;
+let hydrated = false;
 let globalMobileOpen = false;
 
 type Listener = () => void;
@@ -23,6 +23,15 @@ function notify() {
 }
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
+  const [, forceUpdate] = useState(0);
+
+  useEffect(() => {
+    globalCollapsed = readStoredCollapsed();
+    hydrated = true;
+    notify();
+    return subscribe(() => forceUpdate(n => n + 1));
+  }, []);
+
   return <>{children}</>;
 }
 
@@ -54,7 +63,7 @@ export function useSidebar() {
   }, []);
 
   return {
-    collapsed: globalCollapsed,
+    collapsed: hydrated ? globalCollapsed : false,
     setCollapsed,
     toggleCollapsed,
     mobileOpen: globalMobileOpen,

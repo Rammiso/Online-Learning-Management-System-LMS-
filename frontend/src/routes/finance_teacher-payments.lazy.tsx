@@ -8,7 +8,7 @@ import { createLazyFileRoute } from '@tanstack/react-router';
 import { DashboardLayout } from '@/components/dashboard/DashboardLayout';
 import { PageHeader } from '@/components/dashboard/design-system';
 import { requireAuth } from '@/lib/auth';
-import { FinanceFilters, downloadCSV, exportPDF, authHeaders, formatCurrency } from '@/lib/finance-api';
+import { financeFetch, FinanceFilters, downloadCSV, exportPDF, authHeaders, formatCurrency } from '@/lib/finance-api';
 import { FinanceFilterBar } from '@/components/finance/FinanceFilters';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
@@ -44,6 +44,13 @@ function TeacherPaymentsPage() {
   const [creating, setCreating] = useState(false);
   const [paidWarning, setPaidWarning] = useState<any>(null);
 
+  const [salaryAssignments, setSalaryAssignments] = useState<any[]>([]);
+  const [salaryAssignLoading, setSalaryAssignLoading] = useState(false);
+  const [showSalaryAssignDialog, setShowSalaryAssignDialog] = useState(false);
+  const [assignStudentId, setAssignStudentId] = useState('');
+  const [assignSalary, setAssignSalary] = useState('');
+  const [assignEditId, setAssignEditId] = useState<string | null>(null);
+
   const { data: result, isLoading: loading } = useApiQuery<{ data: any[] }>({
     queryKey: ["teacher-payments", filters],
     path: `/finance/teacher-payments?page=${filters.page || 1}&limit=${filters.limit || 20}${filters.dateRange ? `&dateRange=${filters.dateRange}` : ''}`,
@@ -61,6 +68,45 @@ function TeacherPaymentsPage() {
 
   const load = () => {
     queryClient.invalidateQueries({ queryKey: ["teacher-payments"] });
+  };
+
+  const loadSalaryAssignments = async (teacherId: string) => {
+    setSalaryAssignLoading(true);
+    try {
+      const res = await financeFetch<any>(`/teacher-salary-assignments?teacherId=${teacherId}`);
+      setSalaryAssignments(Array.isArray(res) ? res : res.data || []);
+      return res;
+    } catch { setSalaryAssignments([]); }
+    finally { setSalaryAssignLoading(false); }
+  };
+
+  const saveSalaryAssignment = async () => {
+    if (!detail || !assignStudentId || !assignSalary) return;
+    try {
+      const token = localStorage.getItem('token');
+      const body = { teacherId: detail.teacherId, studentId: assignStudentId, monthlySalary: parseFloat(assignSalary) };
+      const res = await fetch(apiUrl('/finance/teacher-salary-assignments'), {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!res.ok) throw new Error('Failed to save');
+      toast.success('Salary assignment saved');
+      setShowSalaryAssignDialog(false);
+      setAssignStudentId('');
+      setAssignSalary('');
+      setAssignEditId(null);
+      await loadSalaryAssignments(detail.teacherId);
+    } catch (e: any) { toast.error(e.message); }
+  };
+
+  const deleteSalaryAssignment = async (id: string) => {
+    if (!detail) return;
+    try {
+      await financeFetch(`/teacher-salary-assignments/${id}`, undefined as any);
+      toast.success('Assignment removed');
+      await loadSalaryAssignments(detail.teacherId);
+    } catch (e: any) { toast.error(e.message); }
   };
 
   const getMonth = () =>
@@ -125,7 +171,11 @@ function TeacherPaymentsPage() {
   const openDetail = async (teacherId: string) => {
     setDetailLoading(true);
     try {
-      setDetail(await financeFetch(`/teacher-payments/${teacherId}`));
+      const [detailRes] = await Promise.all([
+        financeFetch(`/teacher-payments/${teacherId}`),
+        loadSalaryAssignments(teacherId),
+      ]);
+      setDetail(detailRes);
     } catch (e: any) {
       toast.error(e.message);
     } finally {
@@ -457,6 +507,30 @@ function TeacherPaymentsPage() {
                 </div>
               )}
 
+              {salaryAssignments.length > 0 && (
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="font-medium">Salary Assignments</p>
+                    <Button size="sm" variant="outline" onClick={() => setShowSalaryAssignDialog(true)}>
+                      <Plus className="h-3 w-3 mr-1" /> Add
+                    </Button>
+                  </div>
+                  {salaryAssignLoading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    salaryAssignments.map((sa: any) => (
+                      <div key={sa.id} className="border-b border-white/5 py-2 flex justify-between items-center">
+                        <span>{sa.student?.fullName || '—'} <span className="text-xs text-muted-foreground">({sa.studentId?.slice(0, 8)})</span></span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs">ETB {formatCurrency(sa.monthlySalary)}</span>
+                          <Button size="sm" variant="ghost" className="h-6 w-6 p-0" onClick={() => deleteSalaryAssignment(sa.id)}>✕</Button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+
               {detail.payroll && (
                 <div>
                   <p className="mb-2 font-medium">Payroll</p>
@@ -491,6 +565,35 @@ function TeacherPaymentsPage() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={showSalaryAssignDialog} onOpenChange={setShowSalaryAssignDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Add Salary Assignment</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Student</Label>
+              <Select value={assignStudentId} onValueChange={setAssignStudentId}>
+                <SelectTrigger><SelectValue placeholder="Select student..." /></SelectTrigger>
+                <SelectContent className="max-h-[220px]">
+                  {detail?.assignedStudents?.map((s: any) => (
+                    <SelectItem key={s.studentId} value={s.studentId}>{s.studentName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Monthly Salary (ETB)</Label>
+              <Input type="number" min="0" step="0.01" value={assignSalary} onChange={(e) => setAssignSalary(e.target.value)} placeholder="e.g. 1500" />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setShowSalaryAssignDialog(false)}>Cancel</Button>
+            <Button onClick={saveSalaryAssignment}>Save</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 

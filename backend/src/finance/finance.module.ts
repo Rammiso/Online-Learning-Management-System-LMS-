@@ -18,6 +18,7 @@ import { ClassSession } from '../attendance/entities/class-session.entity';
 import { StudentAttendance } from '../attendance/entities/student-attendance.entity';
 import { TeacherReplacement } from '../teacher-replacements/entities/teacher-replacement.entity';
 import { FinanceExpense } from './entities/finance-expense.entity';
+import { TeacherSalaryAssignment } from './entities/teacher-salary-assignment.entity';
 import { User } from '../users/entities/user.entity';
 
 @Module({
@@ -37,6 +38,7 @@ import { User } from '../users/entities/user.entity';
       StudentAttendance,
       TeacherReplacement,
       FinanceExpense,
+      TeacherSalaryAssignment,
       User,
     ]),
     forwardRef(() => NotificationsModule),

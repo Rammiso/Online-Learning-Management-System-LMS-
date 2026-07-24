@@ -22,6 +22,14 @@ export class RecordPaymentDto {
   @IsOptional()
   @IsString()
   transactionDate?: string;
+
+  @IsOptional()
+  @IsString()
+  referenceNumber?: string;
+
+  @IsOptional()
+  @IsString()
+  notes?: string;
 }
 
 export class UpdateStudentFeeDto {

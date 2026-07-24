@@ -48,6 +48,12 @@ export class PaymentTransaction {
   paymentMethod: string;
 
   @Column({ nullable: true })
+  referenceNumber: string;
+
+  @Column({ type: 'text', nullable: true })
+  notes: string;
+
+  @Column({ nullable: true })
   recordedBy: string;
 
   @Column({ type: 'date' })
