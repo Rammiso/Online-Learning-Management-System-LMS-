@@ -12,223 +12,26 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Country } from 'country-state-city';
-import { getCountryIsoByName } from '@/lib/geo-data';
+import { CountryInput, CityInput } from '@/components/ui/location-input';
 import { buildCreateTeacherPayload } from '@/lib/teacher-payload';
-
-// List of all world countries (ISO 3166‑1 English short names)
-const COUNTRIES = [
-  "Afghanistan",
-  "Albania",
-  "Algeria",
-  "Andorra",
-  "Angola",
-  "Antigua and Barbuda",
-  "Argentina",
-  "Armenia",
-  "Australia",
-  "Austria",
-  "Azerbaijan",
-  "Bahamas",
-  "Bahrain",
-  "Bangladesh",
-  "Barbados",
-  "Belarus",
-  "Belgium",
-  "Belize",
-  "Benin",
-  "Bhutan",
-  "Bolivia",
-  "Bosnia and Herzegovina",
-  "Botswana",
-  "Brazil",
-  "Brunei",
-  "Bulgaria",
-  "Burkina Faso",
-  "Burundi",
-  "Cabo Verde",
-  "Cambodia",
-  "Cameroon",
-  "Canada",
-  "Central African Republic",
-  "Chad",
-  "Chile",
-  "China",
-  "Colombia",
-  "Comoros",
-  "Congo (Congo‑Brazzaville)",
-  "Costa Rica",
-  "Croatia",
-  "Cuba",
-  "Cyprus",
-  "Czechia",
-  "Democratic Republic of the Congo",
-  "Denmark",
-  "Djibouti",
-  "Dominica",
-  "Dominican Republic",
-  "Ecuador",
-  "Egypt",
-  "El Salvador",
-  "Equatorial Guinea",
-  "Eritrea",
-  "Estonia",
-  "Eswatini",
-  "Ethiopia",
-  "Fiji",
-  "Finland",
-  "France",
-  "Gabon",
-  "Gambia",
-  "Georgia",
-  "Germany",
-  "Ghana",
-  "Greece",
-  "Grenada",
-  "Guatemala",
-  "Guinea",
-  "Guinea‑Bissau",
-  "Guyana",
-  "Haiti",
-  "Holy See",
-  "Honduras",
-  "Hungary",
-  "Iceland",
-  "India",
-  "Indonesia",
-  "Iran",
-  "Iraq",
-  "Ireland",
-  "Israel",
-  "Italy",
-  "Jamaica",
-  "Japan",
-  "Jordan",
-  "Kazakhstan",
-  "Kenya",
-  "Kiribati",
-  "Kuwait",
-  "Kyrgyzstan",
-  "Laos",
-  "Latvia",
-  "Lebanon",
-  "Lesotho",
-  "Liberia",
-  "Libya",
-  "Liechtenstein",
-  "Lithuania",
-  "Luxembourg",
-  "Madagascar",
-  "Malawi",
-  "Malaysia",
-  "Maldives",
-  "Mali",
-  "Malta",
-  "Marshall Islands",
-  "Mauritania",
-  "Mauritius",
-  "Mexico",
-  "Micronesia",
-  "Moldova",
-  "Monaco",
-  "Mongolia",
-  "Montenegro",
-  "Morocco",
-  "Mozambique",
-  "Myanmar (Burma)",
-  "Namibia",
-  "Nauru",
-  "Nepal",
-  "Netherlands",
-  "New Zealand",
-  "Nicaragua",
-  "Niger",
-  "Nigeria",
-  "North Korea",
-  "North Macedonia",
-  "Norway",
-  "Oman",
-  "Pakistan",
-  "Palau",
-  "Palestine State",
-  "Panama",
-  "Papua New Guinea",
-  "Paraguay",
-  "Peru",
-  "Philippines",
-  "Poland",
-  "Portugal",
-  "Qatar",
-  "Romania",
-  "Russia",
-  "Rwanda",
-  "Saint Kitts and Nevis",
-  "Saint Lucia",
-  "Saint Vincent and the Grenadines",
-  "Samoa",
-  "San Marino",
-  "Sao Tome and Principe",
-  "Saudi Arabia",
-  "Senegal",
-  "Serbia",
-  "Seychelles",
-  "Sierra Leone",
-  "Singapore",
-  "Slovakia",
-  "Slovenia",
-  "Solomon Islands",
-  "Somalia",
-  "South Africa",
-  "South Korea",
-  "South Sudan",
-  "Spain",
-  "Sri Lanka",
-  "Sudan",
-  "Suriname",
-  "Sweden",
-  "Switzerland",
-  "Syria",
-  "Tajikistan",
-  "Tanzania",
-  "Thailand",
-  "Timor‑Leste",
-  "Togo",
-  "Tonga",
-  "Trinidad and Tobago",
-  "Tunisia",
-  "Turkey",
-  "Turkmenistan",
-  "Tuvalu",
-  "Uganda",
-  "Ukraine",
-  "United Arab Emirates",
-  "United Kingdom",
-  "United States of America",
-  "Uruguay",
-  "Uzbekistan",
-  "Vanuatu",
-  "Venezuela",
-  "Vietnam",
-  "Yemen",
-  "Zambia",
-  "Zimbabwe",
-];
 import {
   ChevronLeft,
   GraduationCap,
   Calendar,
-  DollarSign,
+  Wallet,
   Upload,
   User,
   Mail,
   Phone,
   Briefcase,
   Globe,
-  Award,
+  MapPin,
+  BookOpen,
+  Clock,
+  DollarSign,
   FileText,
   Camera,
   Lock,
-  Wallet,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { requireAuth } from '@/lib/auth';
@@ -243,17 +46,6 @@ function AddTeacherPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
 
   // Form State
-  const [cityOptions, setCityOptions] = useState<string[]>([]);
-
-  useEffect(() => {
-    import('country-state-city').then(({ City: C }) => {
-      const iso = getCountryIsoByName(formData.country);
-      if (!iso) { setCityOptions([]); return; }
-      const cities = C.getCitiesOfCountry(iso) ?? [];
-      setCityOptions([...new Set(cities.map((c) => c.name))]);
-    });
-  }, [formData.country]);
-
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -520,46 +312,26 @@ function AddTeacherPage() {
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest ml-1">
                     Country <span className="text-red-500">*</span>
                   </label>
-                  <Select
-                    value={getCountryIsoByName(formData.country)}
-                    onValueChange={(val) => {
-                      const cName = Country.getCountryByCode(val)?.name || val;
-                      handleSelectChange('country', cName);
+                  <CountryInput
+                    value={formData.country}
+                    onChange={(val) => {
+                      handleSelectChange('country', val);
                       handleSelectChange('city', '');
                     }}
-                  >
-                    <SelectTrigger className="w-full h-11 bg-muted dark:bg-nejah-surface border-none rounded-xl">
-                      <SelectValue placeholder="Select Country" />
-                    </SelectTrigger>
-                    <SelectContent className="dark:bg-nejah-surface dark:border-nejah-border-blue max-h-60">
-                      {Country.getAllCountries().map((c) => (
-                        <SelectItem key={c.isoCode} value={c.isoCode}>
-                          {c.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    className="h-11 bg-muted dark:bg-nejah-surface border-none rounded-xl"
+                  />
                 </div>
 
                 <div className="space-y-1">
                   <label className="text-xs font-semibold text-muted-foreground uppercase tracking-widest ml-1">
                     City <span className="text-red-500">*</span>
                   </label>
-                  <Select
+                  <CityInput
+                    country={formData.country}
                     value={formData.city}
-                    onValueChange={(val) => handleSelectChange('city', val)}
-                  >
-                    <SelectTrigger className="w-full h-11 bg-muted dark:bg-nejah-surface border-none rounded-xl">
-                      <SelectValue placeholder="Select City" />
-                    </SelectTrigger>
-                    <SelectContent className="dark:bg-nejah-surface dark:border-nejah-border-blue max-h-60">
-                      {cityOptions.map((cityName) => (
-                          <SelectItem key={cityName} value={cityName}>
-                            {cityName}
-                          </SelectItem>
-                        ))}
-                    </SelectContent>
-                  </Select>
+                    onChange={(val) => handleSelectChange('city', val)}
+                    className="h-11 bg-muted dark:bg-nejah-surface border-none rounded-xl"
+                  />
                 </div>
 
                 <div className="space-y-1 md:col-span-2">
@@ -818,7 +590,7 @@ function AddTeacherPage() {
                     Hourly Billing Rate ($)
                   </label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-nejah-electric" />
+                    <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-nejah-electric" />
                     <Input
                       type="number"
                       name="hourlyRate"
