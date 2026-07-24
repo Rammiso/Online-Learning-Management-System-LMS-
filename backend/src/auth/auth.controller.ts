@@ -75,4 +75,14 @@ export class AuthController {
   getProfile(@CurrentUser() user: any) {
     return user;
   }
+
+  @Get('countries')
+  searchCountries(@Query('q') q: string) {
+    return this.authService.searchCountries(q || '');
+  }
+
+  @Get('cities')
+  searchCities(@Query('country') country: string, @Query('q') q: string) {
+    return this.authService.searchCities(country || '', q || '');
+  }
 }
