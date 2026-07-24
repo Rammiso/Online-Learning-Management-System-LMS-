@@ -15,7 +15,7 @@ import {
   BookOpen,
   Clock,
   Users,
-  DollarSign,
+  Wallet,
   Star,
   TrendingUp,
   ArrowRight,
@@ -148,8 +148,8 @@ export function TeacherDetailsModal({ open, onClose, teacher }: TeacherDetailsMo
               )}
               {analytics?.monthlySalary && (
                 <div className="flex items-center gap-2 text-sm text-muted-foreground dark:text-muted-foreground">
-                  <DollarSign className="h-4 w-4 text-muted-foreground" />
-                  <span>${Number(analytics.monthlySalary).toLocaleString()}/month</span>
+                  <Wallet className="h-4 w-4 text-muted-foreground" />
+                  <span>ETB {Number(analytics.monthlySalary).toLocaleString()}/month</span>
                 </div>
               )}
               {teacher.email && (
