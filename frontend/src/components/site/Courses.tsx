@@ -5,7 +5,7 @@ import { ArrowRight, Clock, BookOpen, Users, GraduationCap, X, Sparkles } from "
 import { Button } from "@/components/ui/button";
 import { useTheme } from "./ThemeProvider";
 import { useHomeCms } from "./HomeCmsProvider";
-import { pickLocalized, resolveCmsImageUrl, type HomeProgram } from "@/lib/home-cms";
+import { pickLocalized, resolveCmsImageUrl, type HomeProgram, type CmsLang } from "@/lib/home-cms";
 import {
   Dialog,
   DialogContent,
@@ -137,7 +137,7 @@ export function Courses() {
   );
 }
 
-function CourseDetailDialog({ program, lang, onClose }: { program: HomeProgram; lang: string; onClose: () => void }) {
+function CourseDetailDialog({ program, lang, onClose }: { program: HomeProgram; lang: CmsLang; onClose: () => void }) {
   const { t } = useTheme();
   const badge = pickLocalized(program.level, lang);
   const title = pickLocalized(program.title, lang);
