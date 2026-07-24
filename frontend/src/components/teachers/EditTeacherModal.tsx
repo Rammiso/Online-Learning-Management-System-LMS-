@@ -19,7 +19,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Pencil, BookOpen, GraduationCap, Briefcase, Upload, DollarSign, Star, Globe, MapPin, Clock, Wifi, Megaphone } from 'lucide-react';
+import { Pencil, BookOpen, GraduationCap, Briefcase, Upload, Wallet, Star, Globe, MapPin, Clock, Wifi, Megaphone } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
 import { buildUpdateTeacherPayload } from '@/lib/teacher-payload';
@@ -533,7 +533,7 @@ export function EditTeacherModal({ open, onClose, onSuccess, teacher, apiEndpoin
               <div className="grid gap-1.5">
                 <Label htmlFor="edit-monthlySalary" className="text-xs font-semibold dark:text-muted-foreground">Monthly Salary</Label>
                 <div className="relative">
-                  <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                  <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                   <Input
                     id="edit-monthlySalary"
                     type="number"
