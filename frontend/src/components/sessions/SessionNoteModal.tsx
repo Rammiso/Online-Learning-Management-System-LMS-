@@ -26,7 +26,7 @@ export function SessionNoteModal({ sessionId, onClose, onSaved }: SessionNoteMod
     try {
       await api('/session-notes/session/' + sessionId, {
         method: 'POST',
-        body: {
+        body: JSON.stringify({
           content: content || lessonSummary || topicsCovered || 'Session notes',
           visibility,
           lessonSummary: lessonSummary || undefined,
@@ -34,7 +34,7 @@ export function SessionNoteModal({ sessionId, onClose, onSaved }: SessionNoteMod
           homeworkAssigned: homeworkAssigned || undefined,
           studentPerformance: studentPerformance || undefined,
           completionRemarks: completionRemarks || undefined,
-        },
+        }),
       });
       toast.success('Notes saved successfully');
       onSaved();
