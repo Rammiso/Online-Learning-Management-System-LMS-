@@ -22,7 +22,7 @@ import {
   ChevronLeft,
   GraduationCap,
   Calendar,
-  DollarSign,
+  Wallet,
   Upload,
   User,
   Mail,
@@ -33,7 +33,6 @@ import {
   FileText,
   Camera,
   Lock,
-  Wallet,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { requireAuth } from '@/lib/auth';
@@ -655,7 +654,7 @@ function AddTeacherPage() {
                     Hourly Billing Rate ($)
                   </label>
                   <div className="relative">
-                    <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-nejah-electric" />
+                    <Wallet className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-nejah-electric" />
                     <Input
                       type="number"
                       name="hourlyRate"
