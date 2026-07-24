@@ -483,4 +483,35 @@ export class AuthService {
   async validateUser(userId: string) {
     return this.usersService.findOne(userId);
   }
+
+  async searchCountries(q: string): Promise<string[]> {
+    if (!q || q.length < 1) return [];
+    const result = await this.studentsRepository
+      .createQueryBuilder('s')
+      .select('DISTINCT s.country', 'country')
+      .where('s.country ILIKE :q', { q: `%${q}%` })
+      .andWhere('s.country IS NOT NULL')
+      .andWhere("s.country != ''")
+      .orderBy('s.country', 'ASC')
+      .limit(10)
+      .getRawMany();
+    return result.map((r: { country: string }) => r.country);
+  }
+
+  async searchCities(country: string, q: string): Promise<string[]> {
+    if (!country || country.length < 1) return [];
+    const query = this.studentsRepository
+      .createQueryBuilder('s')
+      .select('DISTINCT s.city', 'city')
+      .where('s.country = :country', { country })
+      .andWhere('s.city IS NOT NULL')
+      .andWhere("s.city != ''")
+      .orderBy('s.city', 'ASC')
+      .limit(10);
+    if (q && q.length >= 1) {
+      query.andWhere('s.city ILIKE :q', { q: `%${q}%` });
+    }
+    const result = await query.getRawMany();
+    return result.map((r: { city: string }) => r.city);
+  }
 }
