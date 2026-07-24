@@ -14,6 +14,7 @@ import {
 } from './dto/record-payment.dto';
 import { CreateExpenseDto } from './dto/create-expense.dto';
 import { UpdateExpenseDto } from './dto/update-expense.dto';
+import { CreateTeacherSalaryDto, UpdateTeacherSalaryDto } from './dto/teacher-salary.dto';
 
 @Controller('finance')
 @UseGuards(JwtAuthGuard, RolesGuard)
@@ -149,5 +150,38 @@ export class FinanceController {
   @Get('net-profit')
   getNetProfit(@Query('billingMonth') billingMonth?: string) {
     return this.financeService.getNetProfit(billingMonth);
+  }
+
+  @Get('teacher-salary-assignments')
+  getTeacherSalaryAssignments(@Query('teacherId') teacherId?: string) {
+    return this.financeService.getTeacherSalaryAssignments(teacherId);
+  }
+
+  @Post('teacher-salary-assignments')
+  assignTeacherSalary(@Body() dto: CreateTeacherSalaryDto) {
+    return this.financeService.assignTeacherSalary(dto.teacherId, dto.studentId, dto.monthlySalary);
+  }
+
+  @Patch('teacher-salary-assignments/:id')
+  updateTeacherSalaryAssignment(@Param('id') id: string, @Body() dto: UpdateTeacherSalaryDto) {
+    return this.financeService.updateTeacherSalaryAssignment(id, dto.monthlySalary);
+  }
+
+  @Delete('teacher-salary-assignments/:id')
+  deleteTeacherSalaryAssignment(@Param('id') id: string) {
+    return this.financeService.deleteTeacherSalaryAssignment(id);
+  }
+
+  @Get('teacher-earnings/:teacherId')
+  getTeacherEarnings(
+    @Param('teacherId') teacherId: string,
+    @Query('billingMonth') billingMonth?: string,
+  ) {
+    return this.financeService.calculateTeacherEarnings(teacherId, billingMonth);
+  }
+
+  @Get('teacher-assigned-students/:teacherId')
+  getTeacherAssignedStudents(@Param('teacherId') teacherId: string) {
+    return this.financeService.getTeacherAssignedStudents(teacherId);
   }
 }

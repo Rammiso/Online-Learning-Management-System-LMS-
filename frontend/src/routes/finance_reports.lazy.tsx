@@ -14,6 +14,13 @@ import { Button } from '@/components/ui/button';
 import { Download, FileText, Users, GraduationCap, DollarSign } from 'lucide-react';
 import { toast } from 'sonner';
 
+const REPORTS = [
+  { id: 'parent-payments', title: 'Parent Payment Report', icon: Users, desc: 'Paid/unpaid families and outstanding balances' },
+  { id: 'student-payments', title: 'Student Payment Report', icon: GraduationCap, desc: 'Paid, unpaid, and overdue students' },
+  { id: 'teacher-payroll', title: 'Teacher Payroll Report', icon: FileText, desc: 'Teacher earnings and replacement payroll' },
+  { id: 'revenue', title: 'Revenue Report', icon: DollarSign, desc: 'Total revenue and collection rate' },
+];
+
 export const Route = createLazyFileRoute('/finance_reports')({
   component: FinanceReportsPage,
 });

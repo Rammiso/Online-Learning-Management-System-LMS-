@@ -8,6 +8,7 @@ import { FamilyBillingMember } from './entities/family-billing-member.entity';
 import { TeacherPayrollRecord } from './entities/teacher-payroll-record.entity';
 import { TeacherEarningDetail } from './entities/teacher-earning-detail.entity';
 import { FinanceExpense } from './entities/finance-expense.entity';
+import { TeacherSalaryAssignment } from './entities/teacher-salary-assignment.entity';
 import { Student, StudentStatus } from '../students/entities/student.entity';
 import { Parent } from '../parents/entities/parent.entity';
 import { Teacher } from '../teachers/entities/teacher.entity';
@@ -61,6 +62,8 @@ export class FinanceService {
     @InjectRepository(StudentAttendance) private studentAttRepo: Repository<StudentAttendance>,
     @InjectRepository(TeacherReplacement) private replacementRepo: Repository<TeacherReplacement>,
     @InjectRepository(FinanceExpense) private expenseRepo: Repository<FinanceExpense>,
+    @InjectRepository(TeacherSalaryAssignment)
+    private salaryAssignmentRepo: Repository<TeacherSalaryAssignment>,
     @InjectRepository(User) private userRepo: Repository<User>,
     @Inject(forwardRef(() => NotificationsService))
     private readonly notificationsService: NotificationsService,
@@ -1637,5 +1640,80 @@ export class FinanceService {
       previousMonth: prevMonth,
       previousNetProfit: +prevNetProfit.toFixed(2),
     };
+  }
+
+  async getTeacherSalaryAssignments(teacherId?: string) {
+    const where = teacherId ? { teacherId } : {};
+    const assignments = await this.salaryAssignmentRepo.find({
+      where,
+      relations: ['teacher', 'student'],
+      order: { createdAt: 'DESC' },
+    });
+    return assignments.map((a) => ({
+      id: a.id,
+      teacherId: a.teacherId,
+      teacherName: a.teacher?.fullName || '—',
+      studentId: a.studentId,
+      studentName: a.student?.fullName || '—',
+      monthlySalary: this.toNumber(a.monthlySalary),
+      createdAt: a.createdAt,
+    }));
+  }
+
+  async assignTeacherSalary(teacherId: string, studentId: string, monthlySalary: number) {
+    const existing = await this.salaryAssignmentRepo.findOne({ where: { teacherId, studentId } });
+    if (existing) {
+      existing.monthlySalary = monthlySalary;
+      return this.salaryAssignmentRepo.save(existing);
+    }
+    return this.salaryAssignmentRepo.save(
+      this.salaryAssignmentRepo.create({ teacherId, studentId, monthlySalary }),
+    );
+  }
+
+  async updateTeacherSalaryAssignment(id: string, monthlySalary: number) {
+    const assignment = await this.salaryAssignmentRepo.findOne({ where: { id } });
+    if (!assignment) throw new NotFoundException('Salary assignment not found');
+    assignment.monthlySalary = monthlySalary;
+    return this.salaryAssignmentRepo.save(assignment);
+  }
+
+  async deleteTeacherSalaryAssignment(id: string) {
+    const result = await this.salaryAssignmentRepo.delete(id);
+    if (result.affected === 0) throw new NotFoundException('Salary assignment not found');
+    return { deleted: true };
+  }
+
+  async getTeacherAssignedStudents(teacherId: string) {
+    const assignments = await this.salaryAssignmentRepo.find({
+      where: { teacherId },
+      relations: ['student'],
+    });
+    const schedules = await this.scheduleRepo.find({
+      where: { teacherId, status: 'active' },
+      relations: ['student'],
+    });
+    const assignedStudentIds = new Set(assignments.map((a) => a.studentId));
+    const scheduleStudentIds = new Set(schedules.map((s) => s.studentId));
+    const allIds = [...new Set([...assignedStudentIds, ...scheduleStudentIds])];
+
+    const students = allIds.length > 0 ? await this.studentRepo.findBy({ id: In(allIds) }) : [];
+    return students.map((s: Student) => {
+      const assignment = assignments.find((a) => a.studentId === s.id);
+      const studentSchedules = schedules.filter((sch) => sch.studentId === s.id);
+      return {
+        id: s.id,
+        fullName: s.fullName,
+        level: s.level,
+        country: s.country,
+        monthlySalary: assignment ? this.toNumber(assignment.monthlySalary) : 0,
+        weeklySchedule: studentSchedules.map((sch) => ({
+          day: sch.dayOfWeek,
+          startTime: sch.startTimeString,
+          endTime: sch.endTimeString,
+        })),
+        totalWeeklySessions: studentSchedules.length,
+      };
+    });
   }
 }
