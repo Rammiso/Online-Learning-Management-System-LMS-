@@ -5,6 +5,7 @@ type TDict = {
   >;
   hero: Record<
     | "badge"
+    | "title1"
     | "title1Prefix"
     | "title1Courses"
     | "title2"
@@ -135,6 +136,7 @@ export const translations: Record<Lang, TDict> = {
     },
     hero: {
       badge: "The Modern Bridge of Learning",
+      title1: "The Modern Bridge of Learning",
       title1Prefix: "Learn ",
       title1Courses: "Quran|Tajweed|Hifz|Tilawa",
       title2: "Online with",
@@ -272,6 +274,7 @@ export const translations: Record<Lang, TDict> = {
     },
     hero: {
       badge: "الجسر الحديث للتعلم",
+      title1: "الجسر الحديث للتعلم",
       title1Prefix: "تعلّم ",
       title1Courses: "القرآن|التجويد|التحفيظ|تلاوة",
       title2: "عبر الإنترنت مع",
@@ -405,6 +408,7 @@ export const translations: Record<Lang, TDict> = {
     },
     hero: {
       badge: "የዘመናዊ ትምህርት ድልድይ",
+      title1: "ዘመናዊ ባህሪዎች ለ",
       title1Prefix: "",
       title1Courses: "ቁርዓንን ይማሩ|ታጅዊድን ይማሩ|ሂፍዘን ይማሩ|ቲላዋን ይማሩ",
       title2: "በመስመር ላይ ከ",
